@@ -1,4 +1,6 @@
+import http from "http";
 import express from "express";
+import WebSocket from "ws";
 
 const app = express();
 
@@ -17,4 +19,10 @@ app.get("/*", (req, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
-app.listen(3000, handleListen);
+const server = http.createServer(app);
+const wss = new WebSocket.Server({server});
+/* 같은 서버에서 http, websocket 작동(필수 사항 아님) */
+/* express.js를 이용해서 http 서버 생성 */
+/* http 서버 위에 WebSocket 생성 */
+
+server.listen(3000, handleListen);
