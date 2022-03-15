@@ -25,17 +25,28 @@ const wss = new WebSocket.Server({ server });
 /* express.js를 이용해서 http 서버 생성 */
 /* http 서버 위에 WebSocket 생성 */
 
+const sockets = [];
+
 wss.on("connection", (socket) => {
     // socket: 연결된 브라우저 
+    sockets.push(socket);
+    socket["nickname"] = "Anon";    /* 익명 */
     console.log("Connected to Browser ✔")  //브라우저 켜졌을 때
     socket.on("close", () => {              //브라우저 꺼졌을 때
         // 익명함수: 이름이 없는 function
         console.log("Disconnected from the Browser ❌")
     })
-    socket.on("message", (message) => { //브라우저가 서버에 메세지를 보낼 때 
-        console.log(message);
+    socket.on("message", (msg) => { //브라우저가 서버에 메세지를 보낼 때 
+        const message = JSON.parse(msg);
+        /* JSON.stringify: JavaScript object를 string으로 바꿔줌 */
+        switch(message.type){
+            case "new_message":
+                sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
+            case "nickname":
+                console.log(message.payload)
+                socket["nickname"] = message.payload;
+        }
     })
-    socket.send("hello!!!!!!")  //브라우저에 메시지를 보낼때
 })
 
 server.listen(3000, handleListen);
