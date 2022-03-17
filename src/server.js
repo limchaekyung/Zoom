@@ -23,7 +23,23 @@ const httpServer = http.createServer(app);
 const wsServer = SocketIo(httpServer);
 
 wsServer.on("connection", (socket) => {
-    socket.on("enter_room", msg => console.log(msg))
+    socket["nickname"] = "Anon"
+    socket.onAny((e) => {
+        console.log(`Socket Event: ${e}`)
+    });
+    socket.on("enter_room", (roomName, done) => {
+        socket.join(roomName)   //room 생성
+        done()  // showRoom() 실행
+        socket.to(roomName).emit("welcome", socket.nickname) //room에 있는 모든 사람들에게 emit
+    })
+    socket.on("disconnecting", () => {
+        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname))
+    })
+    socket.on("new_message", (msg, room, done) => {
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`)
+        done();
+    })
+    socket.on("nickname", nickname => socket["nickname"] = nickname)
 })
 
 /* const wss = new WebSocket.Server({ server }); */
@@ -37,22 +53,22 @@ wss.on("connection", (socket) => {
     // socket: 연결된 브라우저 
     sockets.push(socket);
     socket["nickname"] = "Anon"; */    /* 익명 */
-    /* console.log("Connected to Browser ✔")  //브라우저 켜졌을 때
-    socket.on("close", () => { */              //브라우저 꺼졌을 때
-        // 익명함수: 이름이 없는 function
-        /* console.log("Disconnected from the Browser ❌")
-    })
-    socket.on("message", (msg) => { //브라우저가 서버에 메세지를 보낼 때 
-        const message = JSON.parse(msg); */
-        /* JSON.stringify: JavaScript object를 string으로 바꿔줌 */
-        /* switch(message.type){
-            case "new_message":
-                sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
-            case "nickname":
-                console.log(message.payload)
-                socket["nickname"] = message.payload;
-        }
-    })
+/* console.log("Connected to Browser ✔")  //브라우저 켜졌을 때
+socket.on("close", () => { */              //브라우저 꺼졌을 때
+// 익명함수: 이름이 없는 function
+/* console.log("Disconnected from the Browser ❌")
+})
+socket.on("message", (msg) => { //브라우저가 서버에 메세지를 보낼 때 
+const message = JSON.parse(msg); */
+/* JSON.stringify: JavaScript object를 string으로 바꿔줌 */
+/* switch(message.type){
+    case "new_message":
+        sockets.forEach(aSocket => aSocket.send(`${socket.nickname}: ${message.payload}`));
+    case "nickname":
+        console.log(message.payload)
+        socket["nickname"] = message.payload;
+}
+})
 }) */
 
 httpServer.listen(3000, handleListen);
