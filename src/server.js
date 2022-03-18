@@ -22,25 +22,50 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const httpServer = http.createServer(app);
 const wsServer = SocketIo(httpServer);
 
+function publicRooms() {
+    const {
+        sockets: {
+            adapter: { sids, rooms },
+        },
+    } = wsServer;
+    const publicRooms = [];
+    rooms.forEach((_, key) => {
+        if (sids.get(key) === undefined) {
+            publicRooms.push(key);
+        }
+    });
+    return publicRooms;
+}
+
+function countRoom(roomName) {
+    return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+}
+
 wsServer.on("connection", (socket) => {
-    socket["nickname"] = "Anon"
-    socket.onAny((e) => {
-        console.log(`Socket Event: ${e}`)
+    socket["nickname"] = "Anon";
+    socket.onAny((event) => {
+        console.log(`Socket Event: ${event}`);
     });
     socket.on("enter_room", (roomName, done) => {
-        socket.join(roomName)   //room 생성
-        done()  // showRoom() 실행
-        socket.to(roomName).emit("welcome", socket.nickname) //room에 있는 모든 사람들에게 emit
-    })
-    socket.on("disconnecting", () => {
-        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname))
-    })
-    socket.on("new_message", (msg, room, done) => {
-        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`)
+        socket.join(roomName);
         done();
-    })
-    socket.on("nickname", nickname => socket["nickname"] = nickname)
-})
+        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
+        wsServer.sockets.emit("room_change", publicRooms());
+    });
+    socket.on("disconnecting", () => {
+        socket.rooms.forEach((room) =>
+            socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)
+        );
+    });
+    socket.on("disconnect", () => {
+        wsServer.sockets.emit("room_change", publicRooms());
+    });
+    socket.on("new_message", (msg, room, done) => {
+        socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+        done();
+    });
+    socket.on("nickname", (nickname) => (socket["nickname"] = nickname));
+});
 
 /* const wss = new WebSocket.Server({ server }); */
 /* 같은 서버에서 http, websocket 작동(필수 사항 아님) */
