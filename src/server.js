@@ -44,6 +44,7 @@ function countRoom(roomName) {
 }
 
 wsServer.on("connection", (socket) => {
+    socket["nickname"] = "Anon";
     socket.onAny((e) => {
         console.log(wsServer.sockets.adapter)
         console.log(`Socket Event: ${e}`)
