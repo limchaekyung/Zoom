@@ -42,21 +42,22 @@ function publicRooms() {
 function countRoom(roomName) {
     return wsServer.sockets.adapter.rooms.get(roomName)?.size;
 }
-wsServer.on("connection", socket => {
+
+wsServer.on("connection", (socket) => {
     socket.on("join_room", (roomName) => {
-        socket.join(roomName)
-        socket.to(roomName).emit("welcome")
-    })
+        socket.join(roomName);
+        socket.to(roomName).emit("welcome");
+    });
     socket.on("offer", (offer, roomName) => {
-        socket.to(roomName).emit("offer", offer)
-    })
+        socket.to(roomName).emit("offer", offer);
+    });
     socket.on("answer", (answer, roomName) => {
-        socket.to(roomName).emit("answer", answer)
-    })
+        socket.to(roomName).emit("answer", answer);
+    });
     socket.on("ice", (ice, roomName) => {
-        socket.to(roomName).emit("ice", ice)
-    })
-})
+        socket.to(roomName).emit("ice", ice);
+    });
+});
 
 // wsServer.on("connection", (socket) => {
 //     socket["nickname"] = "Anon";
