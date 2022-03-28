@@ -1,16 +1,37 @@
 const socket = io();
+
 const myFace = document.getElementById("myFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const camerasSelect = document.getElementById("cameras");
-const call = document.getElementById("call");
-call.hidden = true;
+
+const room = document.getElementById("room");
+const welcome = document.getElementById("welcome");
+const nameForm = welcome.querySelector("#name");
+const enter = welcome.querySelector("#enter");
+const mesg = document.getElementById("mesg")
+
+room.hidden = true;
+mesg.hidden = true;
+
 let myStream;
 let muted = false;
 let cameraOff = false;
+
 let roomName;
 let myPeerConnection;
 let myDataChannel;
+
+nameForm.addEventListener("submit", handleNicknameSubmit);
+
+function handleNicknameSubmit(event) {
+    event.preventDefault();
+    const input = welcome.querySelector("#name input");
+    socket.emit("nickname", input.value);
+    const h4 = welcome.querySelector("#name h4");
+    h4.innerText = `nickname: ${input.value}`;
+    input.value = "";
+}
 
 async function getCameras() {
     try {
@@ -88,27 +109,52 @@ async function handleCameraChange() {
 muteBtn.addEventListener("click", handleMuteClick);
 cameraBtn.addEventListener("click", handleCameraClick);
 camerasSelect.addEventListener("input", handleCameraChange);
+
 // Welcome Form (join a room)
-const welcome = document.getElementById("welcome");
-const welcomeForm = welcome.querySelector("form");
+
 async function initCall() {
-    welcome.hidden = true;
-    call.hidden = false;
     await getMedia();
     makeConnection();
 }
+
+function showRoom() {
+    welcome.hidden = true;
+    room.hidden = false;
+    mesg.hidden = false;
+
+    const h3 = room.querySelector("h3");
+    h3.innerText = `Room ${roomName}`;
+    mesg.addEventListener("submit", handleMessageSubmit);
+}
+
+function addMessage(message) {
+    const ul = mesg.querySelector("ul");
+    const li = document.createElement("li");
+    li.innerText = message;
+    ul.appendChild(li);
+}
+
+function handleMessageSubmit(event) {
+    event.preventDefault();
+    const input = mesg.querySelector("#msg input");
+    const value = input.value;
+    socket.emit("new_message", input.value, roomName, () => {
+        addMessage(`You: ${value}`);
+    });
+    input.value = "";
+}
 async function handleWelcomeSubmit(event) {
     event.preventDefault();
-    const input = welcomeForm.querySelector("input");
+    const input = enter.querySelector("#enter input");
     await initCall();
-    socket.emit("join_room", input.value);
+    socket.emit("join_room", input.value, showRoom);
     roomName = input.value;
     input.value = "";
 }
-welcomeForm.addEventListener("submit", handleWelcomeSubmit);
-// Socket Code
+enter.addEventListener("submit", handleWelcomeSubmit);
 
-socket.on("welcome", async () => {
+// Socket Code
+socket.on("welcome", async (user, newCount) => {
     myDataChannel = myPeerConnection.createDataChannel("chat");
     myDataChannel.addEventListener("message", (event) => console.log(event.data));
     console.log("made data channel");
@@ -116,7 +162,31 @@ socket.on("welcome", async () => {
     myPeerConnection.setLocalDescription(offer);
     console.log("sent the offer");
     socket.emit("offer", offer, roomName);
+    const h3 = room.querySelector("h3")
+    h3.innerText = `Room ${roomName} (${newCount})`
+    addMessage(`${user} joined!`);
 });
+
+socket.on("bye", (left, newCount) => {
+    const h3 = room.querySelector("h3")
+    h3.innerText = `Room ${roomName} (${newCount})`
+    addMessage(`${left} left!`);
+});
+
+socket.on("new_message", addMessage);
+
+socket.on("room_change", (rooms) => {
+    const roomList = welcome.querySelector("ul")
+    roomList.innerHTML = "";
+    if (rooms.length === 0) {
+        return;
+    }
+    rooms.forEach(room => {
+        const li = document.createElement("li")
+        li.innerText = `${room}`;
+        roomList.append(li)
+    })
+})
 
 socket.on("offer", async (offer) => {
     myPeerConnection.addEventListener("datachannel", (event) => {
@@ -140,6 +210,7 @@ socket.on("ice", (ice) => {
     console.log("received candidate");
     myPeerConnection.addIceCandidate(ice);
 });
+
 // RTC Code
 function makeConnection() {
     myPeerConnection = new RTCPeerConnection({

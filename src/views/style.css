@@ -1,108 +1,105 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600&display=swap");
-:root {
-  --active-brightness: 0.85;
-  --border-radius: 5px;
-  --box-shadow: 2px 2px 10px;
-  --color: #118bee;
-  --color-accent: #118bee15;
-  --color-bg: #fff;
-  --color-bg-secondary: #e9e9e9;
-  --color-link: #118bee;
-  --color-secondary: #920de9;
-  --color-secondary-accent: #920de90b;
-  --color-shadow: #f4f4f4;
-  --color-table: #118bee;
-  --color-text: #000;
-  --color-text-secondary: #999;
-  --hover-brightness: 1.2;
-  --justify-important: center;
-  --justify-normal: center;
-  --line-height: 1.5;
-  --width-card: 285px;
-  --width-card-medium: 460px;
-  --width-card-wide: 800px;
-  --width-content: 1080px;
-}
 * {
-  font-family: "Poppins", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  text-transform: capitalize;
+  font-family: "Poppins", sans-serif;
 }
 body {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #f9f7f7;
-  color: var(--color-text);
-  line-height: var(--line-height);
+  background: #524a4e;
+  /* color: #fdeff4; */
 }
 .container {
   height: 80vh;
-  max-width: max-content;
+  /* width: 80ch; */
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.2);
-  background: white;
+  box-shadow: 2px 2px rgba(255, 250, 250, 0.2);
+  background: #fdeff4;
   border-radius: 20px;
+  padding: 20px;
 }
-header,
-main {
-  padding: 1rem;
-}
-
-main header {
-  padding-top: 0;
-}
-
 header {
   display: flex;
+  justify-content: center;
   align-items: center;
+}
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+h1 {
+  background: linear-gradient(to top, #ffc0d3 50%, transparent 50%);
+}
+h3,
+h4 {
+  padding: 15px;
+  text-align: center;
   justify-content: center;
 }
-
-h1 {
-  background: linear-gradient(to top, #dbe2ef 50%, transparent 50%);
-}
-
-h2,
-h3,
-h4,
-h5,
-h6 {
-  line-height: var(--line-height);
-  padding: 15px;
-  text-align: var(--justify-normal);
-}
-#welcome #name h4 {
-  text-align: center;
-}
-#welcome h4,
-#welcome ul,
-#room ul {
-  text-align: left;
-  padding-left: 32px;
-}
 ul {
-  list-style: none;
+  list-style-type: none;
+  list-style-position: inside;
 }
 ul li {
   padding: 0.2rem 0;
 }
-
+#myStream {
+  display: flex;
+  flex-direction: column;
+  float: left;
+  padding: 15px;
+  width: 400px;
+  height: 400px;
+}
+#myStream input,
+select,
+option {
+  float: left;
+}
+#myFace {
+  display: flex;
+  flex-direction: column;
+  width: 25rem;
+  height: auto;
+}
+#peerStream {
+  float: right;
+  width: 400px;
+  padding: 15px;
+}
+#peerFace {
+  width: 25rem;
+  height: auto;
+}
+#room h3 {
+  float: left;
+}
+#room a {
+  padding: 15px;
+  text-decoration: none;
+  font-size: 2rem;
+  text-align: center;
+  justify-content: center;
+  color: #ff5c8d;
+}
 button {
-  border-radius: var(--border-radius);
+  border-radius: 5px;
   display: inline-block;
   font-size: medium;
   font-weight: bold;
-  line-height: var(--line-height);
+  line-height: 1.5;
   margin-bottom: 1rem;
+  margin-left: 0.5rem;
   padding: 0.4rem 0.8rem;
   justify-content: flex-end;
-  background-color: #3f72af;
-  color: var(--color-bg);
+  background-color: #ff5c8d;
+  color: #fdeff4;
   width: 122.48px;
   border-style: none;
 }
@@ -115,20 +112,20 @@ button:hover {
   cursor: pointer;
   background-color: #112d4e;
 }
-
 form {
   display: block;
   padding: 0 2rem;
 }
-
 input,
 select,
-textarea {
-  border: 1px solid var(--color-bg-secondary);
-  border-radius: var(--border-radius);
+option {
+  border: 1px solid #e9e9e9;
+  border-radius: 5px;
   margin-bottom: 1rem;
   padding: 0.4rem 0.8rem;
   width: 300px;
   margin-right: 8px;
   margin-left: 15px;
+  font-size: medium;
+  font-weight: bold;
 }
